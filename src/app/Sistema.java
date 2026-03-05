@@ -22,7 +22,7 @@ public class Sistema {
             menu.inicial();
             op = sc.nextInt();
             executarOperacao(op);
-        } while (op != 5);
+        } while (op != 0);
     }
 
     private void executarOperacao(int opInicial) {
@@ -41,7 +41,7 @@ public class Sistema {
             case 4:
                 mensagem = "Matheus não sabe Java!";
                 break;
-            case 5:
+            case 0:
                 mensagem = "Saindo...";
                 break;
             default:
@@ -67,19 +67,28 @@ public class Sistema {
                 cadastrarUsuario();
                 break;
             case 2:
+                atualizarUsuario();
+                break;
+            case 3:
                 consultarUsuarios();
                 break;
+
+            case 0:
+                break;
             default:
-                System.out.println("Opção inválida");
+                menu.opInvalido();
+                gerenciarUsuarios();
                 break;
         }
     }
     private void cadastrarUsuario() {
         System.out.println("[1] Funcionario");
         System.out.println("[2] Estudante");
+        System.out.println("[0] Voltar");
 
         int op = sc.nextInt();
         sc.nextLine();
+
 
         if (op != 1 && op != 2) return;
 
@@ -88,36 +97,49 @@ public class Sistema {
         System.out.printf("Email: ");
         String email = sc.nextLine();
 
+
         switch (op) {
             case 1:
-                System.out.printf("Digite seu salario: ");
-
-                float salario = sc.nextFloat();
-                sc.nextLine();
-                Usuario funcionario = new Funcionario(nome, email, salario);
-                users.put(funcionario.getId(), funcionario);
-
-                System.out.println("\nCadastro do funcionário realizado com sucesso!");
-                System.out.println("Pressione ENTER para continuar...\n");
-                sc.nextLine();
+                cadastrarFuncionario(nome, email);
                 gerenciarUsuarios();
                 break;
             case 2:
-                System.out.printf("Digite sua matricula: ");
-
-                String matricula = sc.nextLine();
-                Usuario estudante = new Estudante(nome, email, matricula);
-                users.put(estudante.getId(), estudante);
-
-                System.out.println("\nCadastro do estudante realizado com sucesso!");
-                System.out.println("Pressione ENTER para continuar...\n");
-                sc.nextLine();
+                cadastrarEstudante(nome, email);
                 gerenciarUsuarios();
                 break;
             default:
+                menu.opInvalido();
+                cadastrarUsuario();
                 break;
         }
     }
+
+    private void cadastrarFuncionario(String nome, String email) {
+        System.out.printf("Digite seu salario: ");
+
+        float salario = sc.nextFloat();
+        sc.nextLine();
+
+        Usuario funcionario = new Funcionario(nome, email, salario);
+        users.put(funcionario.getId(), funcionario);
+
+        System.out.println("\nCadastro do funcionário realizado com sucesso!");
+        System.out.println("Pressione ENTER para continuar...\n");
+        sc.nextLine();
+    }
+
+    private void cadastrarEstudante(String nome, String email) {
+        System.out.printf("Digite sua matricula: ");
+
+        String matricula = sc.nextLine();
+        Usuario estudante = new Estudante(nome, email, matricula);
+        users.put(estudante.getId(), estudante);
+
+        System.out.println("\nCadastro do estudante realizado com sucesso!");
+        System.out.println("Pressione ENTER para continuar...\n");
+        sc.nextLine();
+    }
+
     private void consultarUsuarios() {
         System.out.println("USUÁRIOS\n");
         System.out.printf("%-5s %-20s %-40s %-15s%n", "ID", "Nome", "Email", "Tipo");
@@ -133,5 +155,80 @@ public class Sistema {
         System.out.println("\nPressione ENTER para continuar...");
         sc.nextLine();
         gerenciarUsuarios();
+    }
+    private void atualizarUsuario() {
+        System.out.println("Digite o ID do usuário que deseja editar: ");
+        int id = sc.nextInt();
+        sc.nextLine();
+
+        Usuario user = users.get(id);
+        if (user == null) {
+            System.out.println("Usuário não existe");
+            atualizarUsuario();
+            return;
+        }
+        System.out.println("Usuário encontrado");
+        System.out.printf("%-5s %-20s %-40s %-15s\n",
+                user.getId(),
+                user.getNome(),
+                user.getEmail(),
+                user.getTipo()
+        );
+        System.out.println("[1] Editar Nome");
+        System.out.println("[2] Editar Email");
+        System.out.println("[3] Editar Tipo");
+        System.out.println("[0] Voltar");
+
+        int op = sc.nextInt();
+        sc.nextLine();
+
+        switch (op) {
+            case 1:
+                System.out.printf("Nome: ");
+                String nome = sc.nextLine();
+                user.setNome(nome);
+                break;
+            case 2:
+                System.out.printf("Email: ");
+                String email = sc.nextLine();
+                user.setEmail(email);
+                break;
+            case 3:
+                mudarTipo(user);
+                break;
+            case 0:
+                break;
+            default:
+                menu.opInvalido();
+                atualizarUsuario();
+                break;
+
+        }
+
+    }
+    private void mudarTipo(Usuario user) {
+        System.out.println("[1] Funcionário");
+        System.out.println("[2] Estudante");
+        System.out.println("[0] Voltar");
+        int op = sc.nextInt();
+        sc.nextLine();
+
+        users.remove(user.getId());
+
+        switch (op) {
+            case 1:
+                cadastrarFuncionario(user.getNome(), user.getEmail());
+                break;
+            case 2:
+                cadastrarEstudante(user.getNome(), user.getEmail());
+                break;
+            case 0:
+                break;
+            default:
+                menu.opInvalido();
+                mudarTipo(user);
+                break;
+        }
+
     }
 }
